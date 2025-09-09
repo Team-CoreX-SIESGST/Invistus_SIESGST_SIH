@@ -36,6 +36,8 @@ import {
   BarChart3,
   Waves,
 } from "lucide-react";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 // Realistic ARGO float data with ocean coordinates - expanded dataset
 const dummyFloats = [
@@ -1501,7 +1503,7 @@ export default function Home() {
         User question: ${input}
       `;
 
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
       const result = await model.generateContent(contextPrompt);
       const response = await result.response;
       const text = response.text();
@@ -1726,7 +1728,13 @@ export default function Home() {
                       : "bg-slate-100 text-slate-800 border border-slate-200 shadow-sm"
                   }`}
                 >
-                  <div className="text-sm leading-relaxed">{msg.content}</div>
+                  <div
+                    className="text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: DOMPurify.sanitize(marked(msg.content)),
+                    }}
+                  >
+                  </div>
                 </div>
               </div>
             ))}
