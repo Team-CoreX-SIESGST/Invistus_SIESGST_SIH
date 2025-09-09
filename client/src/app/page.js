@@ -1338,73 +1338,76 @@ export default function Home() {
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
   // Initialize Google Maps
-  useEffect(() => {
-    if (
-      !GOOGLE_MAPS_API_KEY ||
-      GOOGLE_MAPS_API_KEY === "your-google-maps-api-key-here"
-    ) {
-      console.warn("Google Maps API key not configured");
-      return;
-    }
+useEffect(() => {
+  if (
+    !GOOGLE_MAPS_API_KEY ||
+    GOOGLE_MAPS_API_KEY === "your-google-maps-api-key-here"
+  ) {
+    console.warn("Google Maps API key not configured");
+    return;
+  }
 
-    const loader = new Loader({
-      apiKey: GOOGLE_MAPS_API_KEY,
-      version: "weekly",
-    });
+  const loader = new Loader({
+    apiKey: GOOGLE_MAPS_API_KEY,
+    version: "weekly",
+  });
 
-    loader
-      .load()
-      .then(() => {
-        const map = new window.google.maps.Map(mapRef.current, {
-          center: { lat: 18.7, lng: 68.0 },
-          zoom: 7,
-          mapTypeId: "terrain",
-          styles: [
-            {
-              featureType: "water",
-              stylers: [{ color: "#4285F4" }],
-            },
-          ],
-        });
+  loader
+    .load()
+    .then(() => {
+      const map = new window.google.maps.Map(mapRef.current, {
+        center: { lat: 18.7, lng: 68.0 },
+        zoom: 7,
+        mapTypeId: "terrain",
+        styles: [
+          {
+            featureType: "water",
+            stylers: [{ color: "#4285F4" }],
+          },
+        ],
+      });
 
-        setMap(map);
+      setMap(map);
 
-        // Add markers for each float
-        const newMarkers = dummyFloats.map((float) => {
-          const marker = new window.google.maps.Marker({
-            position: { lat: float.lat, lng: float.lng },
-            map: map,
-            title: float.name,
-            icon: {
-              url: `data:image/svg+xml;base64,${btoa(`
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${
-                float.status === "active"
-                  ? "#4285F4"
-                  : float.status === "maintenance"
-                  ? "#F59E0B"
-                  : "#9CA3AF"
-              }" stroke="#ffffff" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
+      // Add markers for each float
+      const newMarkers = dummyFloats.map((float) => {
+        const pinColor =
+          float.status === "active"
+            ? "#4285F4"
+            : float.status === "maintenance"
+            ? "#F59E0B"
+            : "#9CA3AF";
+
+        const marker = new window.google.maps.Marker({
+          position: { lat: float.lat, lng: float.lng },
+          map: map,
+          title: float.name,
+          icon: {
+            url: `data:image/svg+xml;base64,${btoa(`
+              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40">
+                <path fill="${pinColor}" stroke="#ffffff" stroke-width="2" 
+                  d="M15 0C9.7 0 5.4 4.3 5.4 9.6c0 5.2 9.6 19.4 9.6 19.4s9.6-14.2 9.6-19.4C24.6 4.3 20.3 0 15 0z"/>
+                <circle cx="15" cy="9" r="4" fill="#ffffff"/>
               </svg>
             `)}`,
-              scaledSize: new window.google.maps.Size(30, 30),
-              anchor: new window.google.maps.Point(12, 12),
-            },
-          });
-
-          marker.addListener("click", () => {
-            handleFloatSelect(float);
-          });
-
-          return marker;
+            scaledSize: new window.google.maps.Size(30, 40),
+            anchor: new window.google.maps.Point(15, 40),
+          },
         });
 
-        setMarkers(newMarkers);
-      })
-      .catch((error) => {
-        console.error("Failed to load Google Maps:", error);
+        marker.addListener("click", () => {
+          handleFloatSelect(float);
+        });
+
+        return marker;
       });
-  }, []);
+
+      setMarkers(newMarkers);
+    })
+    .catch((error) => {
+      console.error("Failed to load Google Maps:", error);
+    });
+}, []);
 
   const handleFloatSelect = (float) => {
     setSelectedFloat(float);
